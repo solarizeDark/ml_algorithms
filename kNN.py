@@ -1,19 +1,31 @@
-import math
 import statistics
+from math import *
 
 from dataset_loader import cross_validation_split, accuracy, minmax_normalization
 
-def euclidean_distance(v1, v2):
+def gauss_nucleus_function(distance):
+	return pow((2 * pi), -0.5) * pow(e, -0.5 * distance * distance)
+
+def euclidean_distance_with_weight(v1, v2, width=0.05):
 	res = 0
 	for i in range(len(v1) - 1):
-		res += (v1[i] - v2[i]) * (v1[i] - v2[i])
-	return math.sqrt(res)
+		res += gauss_nucleus_function((v1[i] - v2[i]) * (v1[i] - v2[i]) / width)
+	return sqrt(res)
 
-def get_neighbors(v, dataset, k):
+def euclidean_distance(v1, v2):
+	res = 0
+	for i in range(len(v1)):
+		res += ((v1[i] - v2[i]) * (v1[i] - v2[i]))
+	return sqrt(res)
+
+def get_neighbors(vector, dataset, k):
 	temp = {i : dataset[i] for i in range(len(dataset))}
 	for i in temp:
-		row = list(j for j in range(len(temp) - 1))
-		temp[i] = euclidean_distance(v, row)
+		row = list(temp[i][j] for j in range(len(temp[i]) - 1))
+		# case of vector got from test fold of train data
+		if len(vector) > len(row):
+			vector = list(vector[z] for z in range(len(vector) - 1))
+		temp[i] = euclidean_distance(vector, row)
 	# lambda item: item[1] means sorting by second value == value in (key, value)
 	temp = dict(sorted(temp.items(), key=lambda item: item[1]))
 	neighbors = []
