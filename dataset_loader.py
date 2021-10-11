@@ -1,7 +1,6 @@
 import random
 import statistics
 from _csv import writer
-
 from csv import reader
 
 def load_dataset(filename, del_first=True):
@@ -15,6 +14,19 @@ def load_dataset(filename, del_first=True):
 				continue
 			dataset.append(row)
 	return dataset
+
+# special
+def load_dataset_column_as_row(filename, del_first=True):
+	features = {}
+	with open(filename, 'r', encoding='utf-8') as file:
+		csv_reader = reader(file)
+		if del_first:
+			csv_reader.__next__()
+		for row in csv_reader:
+			if not row:
+				continue
+			features[row[1]] = row[0]
+	return features
 
 def func_mapper(row):
 	mapping = {}
@@ -88,9 +100,10 @@ def cross_validation_split(dataset, folds_n=5):
 		folds.append(fold)
 	return folds
 
-def minmax_normalization(dataset):
+# columns - which should be normalized
+def minmax_normalization(dataset, columns):
 	minmax = []
-	for i in range(len(dataset[0])):
+	for i in columns:
 		column = [row[i] for row in dataset]
 		minmax.append([min(column), max(column)])
 	for j in range(len(dataset)):

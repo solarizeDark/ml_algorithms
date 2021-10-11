@@ -18,18 +18,31 @@ def euclidean_distance(v1, v2):
 		res += ((v1[i] - v2[i]) * (v1[i] - v2[i]))
 	return sqrt(res)
 
-def get_neighbors(vector, dataset, k):
+# spec case for existed weights
+def euclidian_distance_quality_feaures(v1, v2):
+	# vectors are dictionaries (feature - weight)
+	res = 0
+	for feature_x in v1:
+		for feature_y in v2:
+			if feature_x == feature_y:
+				res += (int(v1[feature_x]) + int(v2[feature_y])) / 2
+	return res
+
+
+def get_neighbors(vector, dataset, k, distance=euclidean_distance, reversed_dist=False):
 	temp = {i : dataset[i] for i in range(len(dataset))}
 	for i in temp:
 		row = list(temp[i][j] for j in range(len(temp[i]) - 1))
 		# case of vector got from test fold of train data
 		if len(vector) > len(row):
 			vector = list(vector[z] for z in range(len(vector) - 1))
-		temp[i] = euclidean_distance(vector, row)
+		temp[i] = distance(vector, row)
 	# lambda item: item[1] means sorting by second value == value in (key, value)
 	temp = dict(sorted(temp.items(), key=lambda item: item[1]))
 	neighbors = []
 	cnt = 0
+	if reversed_dist:
+		temp = reversed(temp)
 	for i in temp:
 		if cnt < k:
 			neighbors.append(dataset[i])
